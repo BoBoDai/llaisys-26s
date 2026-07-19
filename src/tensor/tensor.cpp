@@ -2,6 +2,7 @@
 
 #include "../utils.hpp"
 
+#include <cstddef>
 #include <cstring>
 #include <numeric>
 #include <sstream>
@@ -164,7 +165,16 @@ void Tensor::debug() const {
 }
 
 bool Tensor::isContiguous() const {
-    TO_BE_IMPLEMENTED();
+    const auto& shape = this->shape();
+    const auto& strides = this->strides();
+    if (shape.size() <= 1) {
+        return true;
+    }
+    for (size_t i = shape.size(); --i > 0;) {
+        if (strides[i - 1] != static_cast<ptrdiff_t>(strides[i] * shape[i])) {
+            return false;
+        }
+    }
     return true;
 }
 
