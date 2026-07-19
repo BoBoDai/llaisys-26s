@@ -183,8 +183,17 @@ tensor_t Tensor::slice(size_t dim, size_t start, size_t end) const {
     return std::shared_ptr<Tensor>(new Tensor(_meta, _storage));
 }
 
-void Tensor::load(const void *src_) {
-    TO_BE_IMPLEMENTED();
+void Tensor::load(const void *src) {
+    core::context().setDevice(this->deviceType(), this->deviceId());
+    if (this->deviceType() == LLAISYS_DEVICE_CPU) {
+        memcpy(this->data(), src, this->elementSize() * this->numel());
+    } else {
+        core::context().runtime().api()->memcpy_sync(
+            this->data(),
+            src,
+            this->numel() * this->elementSize(),
+            LLAISYS_MEMCPY_H2D);
+    }
 }
 
 tensor_t Tensor::contiguous() const {
