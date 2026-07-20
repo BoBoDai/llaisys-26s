@@ -184,8 +184,22 @@ tensor_t Tensor::permute(const std::vector<size_t> &order) const {
 }
 
 tensor_t Tensor::view(const std::vector<size_t> &shape) const {
-    TO_BE_IMPLEMENTED();
-    return std::shared_ptr<Tensor>(new Tensor(_meta, _storage));
+    size_t new_numel = 1;
+    for (auto s : shape) {
+        new_numel *= s;
+    }
+    if (new_numel != this->numel()) {
+        EXCEPTION_SHAPE_MISMATCH;
+    }
+    size_t ndim_ = shape.size();
+    std::vector<ptrdiff_t> new_strides(ndim_);
+    size_t stride = 1;
+    for (size_t i = 1; i <= ndim_; i++) {
+        new_strides[ndim_ - i] = stride;
+        stride *= shape[ndim_ - i];
+    }
+    TensorMeta new_meta{this->dtype(), shape, new_strides};
+    return std::shared_ptr<Tensor>(new Tensor(new_meta, _storage, _offset));
 }
 
 tensor_t Tensor::slice(size_t dim, size_t start, size_t end) const {
