@@ -33,7 +33,11 @@ def test_tensor():
     torch_tensor_perm = torch_tensor.permute(2, 0, 1)
     llaisys_tensor_perm = llaisys_tensor.permute(2, 0, 1)
     llaisys_tensor_perm.debug()
+    print("torch_tensor_perm shape:", torch_tensor_perm.shape)
+    print("llaisys_tensor_perm shape:", llaisys_tensor_perm.shape())
     assert llaisys_tensor_perm.shape() == torch_tensor_perm.shape
+    print("torch_tensor_perm strides:", torch_tensor_perm.stride())
+    print("llaisys_tensor_perm strides:", llaisys_tensor_perm.strides())
     assert llaisys_tensor_perm.strides() == torch_tensor_perm.stride()
     assert llaisys_tensor.is_contiguous() == torch_tensor.is_contiguous()
     assert check_equal(llaisys_tensor_perm, torch_tensor_perm)
