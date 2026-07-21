@@ -180,7 +180,7 @@ bool Tensor::isContiguous() const {
 
 tensor_t Tensor::permute(const std::vector<size_t> &order) const {
     const auto& shape = this->shape();
-    std::vector<size_t> new_shape(shape.size());
+    std::vector<size_t> new_shape;
     
     for (size_t o : order) {
         new_shape.push_back(shape[o]);
