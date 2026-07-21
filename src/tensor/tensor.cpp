@@ -180,17 +180,13 @@ bool Tensor::isContiguous() const {
 
 tensor_t Tensor::permute(const std::vector<size_t> &order) const {
     const auto& shape = this->shape();
+    const auto& strides = this->strides();
     std::vector<size_t> new_shape;
+    std::vector<ptrdiff_t> new_strides;
     
     for (size_t o : order) {
         new_shape.push_back(shape[o]);
-    }
-    size_t ndim_ = shape.size();
-    std::vector<ptrdiff_t> new_strides(ndim_);
-    size_t stride = 1;
-    for (size_t i = 1; i <= ndim_; i++) {
-        new_strides[ndim_ - i] = stride;
-        stride *= new_shape[ndim_ - i];
+        new_strides.push_back(strides[o]);
     }
 
     auto dtype = this->dtype();
