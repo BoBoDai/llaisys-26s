@@ -47,6 +47,13 @@ void argmax(tensor_t max_idx, tensor_t max_val, tensor_t vals) {
                 reinterpret_cast<const bf16_t*>(vals->data()),
                 num
             );
+        case LLAISYS_DTYPE_F16:
+            return argmax_(
+                reinterpret_cast<int64_t*>(max_idx->data()),
+                reinterpret_cast<fp16_t*>(max_val->data()),
+                reinterpret_cast<const fp16_t*>(vals->data()),
+                num
+            );
         default:
             ASSERT(false, "Unsupported data type for argmax");
     }
