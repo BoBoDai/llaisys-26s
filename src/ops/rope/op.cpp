@@ -4,7 +4,7 @@
 
 namespace llaisys::ops {
 template <typename T>
-void rope_(T* out, const T* in, const int* pos_ids, float theta, size_t seqlen, size_t nhead, size_t d) {
+void rope_(T* out, const T* in, const int64_t* pos_ids, float theta, size_t seqlen, size_t nhead, size_t d) {
     size_t half_d = d / 2;
     size_t seq_stride = nhead * d;
 
@@ -40,21 +40,18 @@ void rope(tensor_t out, tensor_t in, tensor_t pos_ids, float theta) {
             return rope_(
                 reinterpret_cast<bf16_t*>(out->data()),
                 reinterpret_cast<const bf16_t*>(in->data()),
-                reinterpret_cast<const int*>(pos_ids->data()), theta, m, n, k
-            );
+                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
         case LLAISYS_DTYPE_F16:
             return rope_(
                 reinterpret_cast<fp16_t*>(out->data()),
                 reinterpret_cast<const fp16_t*>(in->data()),
-                reinterpret_cast<const int*>(pos_ids->data()), theta, m, n, k
-            );
+                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
         case LLAISYS_DTYPE_F32:
             return rope_(
                 reinterpret_cast<float*>(out->data()),
                 reinterpret_cast<const float*>(in->data()),
-                reinterpret_cast<const int*>(pos_ids->data()), theta, m, n, k
-            );
-        default:\
+                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
+        default:
             EXCEPTION_UNSUPPORTED_DATATYPE(dtype);
         }
 }
