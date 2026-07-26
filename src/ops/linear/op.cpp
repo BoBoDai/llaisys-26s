@@ -4,10 +4,10 @@ namespace llaisys::ops {
 
 template <typename T>
 void linear_(T* out, const T* in, const T* weight, const T* bias, size_t out_m, size_t out_n, size_t weight_k) {
-    for (int i = 0; i < out_m; ++i) {
-        for (int j = 0; j < out_n; ++j) {
+    for (size_t i = 0; i < out_m; ++i) {
+        for (size_t j = 0; j < out_n; ++j) {
             float sum = 0.0f;
-            for (int k = 0; k < weight_k; ++k) {
+            for (size_t k = 0; k < weight_k; ++k) {
                 sum += utils::cast<float>(in[i * weight_k + k]) * 
                 utils::cast<float>(weight[j * weight_k + k]);
             }
