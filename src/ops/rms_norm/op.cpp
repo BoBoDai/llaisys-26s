@@ -9,7 +9,7 @@ void rms_norm_(T* out, const T* in, const T* weight, float eps, size_t m, size_t
             float val = utils::cast<float>(in[i * n + j]);
             sum_sq += val * val;
         }
-        sum_sq = 1.0f / sqrtf(sum_sq / static_cast<float>(n) + eps);
+        sum_sq = 1.0f / std::sqrt(sum_sq / static_cast<float>(n) + eps);
         for (size_t j = 0; j < n; j++) {
             out[i * n + j] = utils::cast<T>(
                 utils::cast<float>(in[i * n + j]) * 
