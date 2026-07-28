@@ -63,7 +63,7 @@ void self_attention_(T* attn_val, const T* q, const T* k, const T* v,
                     float sum = 0;
                     for (size_t k_idx = 0; k_idx < d; k_idx++) {
                         sum += utils::cast<float>(q[i * nhead * d + h * d + k_idx]) *
-                               utils::cast<float>(k[j * nhead * d + h * d + k_idx]);
+                               utils::cast<float>(k[j * nkvhead * d + (h % nkvhead) * d + k_idx]);
                     }
                     scores[i * nhead * total_len + h * total_len + j] = sum * scale;
                 }
