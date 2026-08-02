@@ -9,6 +9,7 @@ private:
     llaisysDeviceType_t _device_type;
     int *_device_ids;
     int _ndevice;
+    int _device_id;
     LlaisysQwen2Weights *_weights;
     Qwen2Model(const LlaisysQwen2Meta *meta, llaisysDeviceType_t device, int *device_ids, int ndevice);
 
