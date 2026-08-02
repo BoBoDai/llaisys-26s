@@ -6,6 +6,19 @@ namespace llaisys::models {
 Qwen2Model::Qwen2Model(const LlaisysQwen2Meta *meta, llaisysDeviceType_t device, int *device_ids, int ndevice)
     : _meta(*meta), _device_type(device), _device_ids(device_ids), _ndevice(ndevice) {
     _weights = new LlaisysQwen2Weights();
+    size_t n = meta->nlayer;
+    _weights->attn_norm_w = new llaisysTensor_t[n]();
+    _weights->attn_q_w = new llaisysTensor_t[n]();
+    _weights->attn_q_b = new llaisysTensor_t[n]();
+    _weights->attn_k_w = new llaisysTensor_t[n]();
+    _weights->attn_k_b = new llaisysTensor_t[n]();
+    _weights->attn_v_w = new llaisysTensor_t[n]();
+    _weights->attn_v_b = new llaisysTensor_t[n]();
+    _weights->attn_o_w = new llaisysTensor_t[n]();
+    _weights->mlp_norm_w = new llaisysTensor_t[n]();
+    _weights->mlp_gate_w = new llaisysTensor_t[n]();
+    _weights->mlp_up_w = new llaisysTensor_t[n]();
+    _weights->mlp_down_w = new llaisysTensor_t[n]();
 }
 
 Qwen2Model::~Qwen2Model() {
