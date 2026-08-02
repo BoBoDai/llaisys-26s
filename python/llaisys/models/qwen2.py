@@ -20,7 +20,7 @@ class Qwen2:
             hs=config["hidden_size"],
             nh=config["num_attention_heads"],
             nkvh=config["num_key_value_heads"],
-            dh=config["hidden_size"],
+            dh=config["hidden_size"] // config["num_attention_heads"],
             di=config["intermediate_size"],
             maxseq=config["max_position_embeddings"],
             voc=config["vocab_size"],
@@ -58,16 +58,16 @@ class Qwen2:
         n_input = len(tokens)
         token_ids = (c_int64 * n_input)(*tokens)
         next_token = LIB_LLAISYS.llaisysQwen2ModelInfer(self.model, token_ids, c_size_t(n_input))
+        tokens.append(next_token)
         if next_token == self.meta.end_token:
             return tokens
-        tokens.append(next_token)
 
         # decode: feed one token at a time
         for _ in range(max_new_tokens - 1):
             token_ids = (c_int64 * 1)(next_token)
             next_token = LIB_LLAISYS.llaisysQwen2ModelInfer(self.model, token_ids, c_size_t(1))
+            tokens.append(next_token)
             if next_token == self.meta.end_token:
                 break
-            tokens.append(next_token)
 
         return tokens
