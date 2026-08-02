@@ -14,11 +14,12 @@ private:
 
 public:
     static Qwen2Model *create(const LlaisysQwen2Meta *meta, llaisysDeviceType_t device, int *device_ids, int ndevice);
-    ~Qwen2Model() = default;
+    ~Qwen2Model();
 
     void loadWeights(const char *name, void *data, size_t size);
     LlaisysQwen2Weights *weights();
     int64_t infer(int64_t *token_ids, size_t ntoken);
+    void destroyWeights();
 };
 
 } // namespace llaisys::models
