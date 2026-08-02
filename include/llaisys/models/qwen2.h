@@ -37,7 +37,7 @@ __C {
 
     __export struct LlaisysQwen2Weights *llaisysQwen2ModelWeights(struct LlaisysQwen2Model * model);
     
-    __export void *llaisysQwen2ModelLoadWeights(struct LlaisysQwen2Model * model, const char *name, void *data, size_t size);
+    __export void llaisysQwen2ModelLoadWeights(struct LlaisysQwen2Model * model, const char *name, void *data, size_t size);
 
     __export int64_t llaisysQwen2ModelInfer(struct LlaisysQwen2Model * model, int64_t * token_ids, size_t ntoken);
 }
