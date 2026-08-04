@@ -20,7 +20,7 @@ void swiglu(tensor_t out, tensor_t gate, tensor_t up) {
     switch (out->deviceType()) {
     case LLAISYS_DEVICE_CPU:
         return cpu::swiglu(out, gate, up);
-#ifdef LLAISYS_NVIDIA_API
+#ifdef ENABLE_NVIDIA_API
     case LLAISYS_DEVICE_NVIDIA:
         return nvidia::swiglu(out, gate, up);
 #endif
