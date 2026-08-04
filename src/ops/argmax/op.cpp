@@ -5,8 +5,8 @@
 namespace llaisys::ops {
 void argmax(tensor_t max_idx, tensor_t max_val, tensor_t vals) {
     CHECK_SAME_DEVICE(max_idx, max_val, vals);
-    CHECK_SAME_SHAPE(max_idx->shape(), max_val->shape(), vals->shape());
-    CHECK_SAME_DTYPE(max_idx->dtype(), max_val->dtype(), vals->dtype());
+    CHECK_SAME_SHAPE(max_idx->shape(), max_val->shape());
+    CHECK_SAME_DTYPE(max_val->dtype(), vals->dtype());
 
     ASSERT(max_idx->isContiguous() && max_val->isContiguous() && vals->isContiguous(),
            "argmax only supports contiguous tensors");
