@@ -1,5 +1,8 @@
 #include "op.hpp"
 #include "cpu/embedding_cpu.hpp"
+#ifdef ENABLE_NVIDIA_API
+#include "nvidia/embedding_nvidia.cuh"
+#endif
 #include <cassert>
 #include <cstddef>
 #include <cstring>

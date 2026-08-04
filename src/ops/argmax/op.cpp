@@ -1,6 +1,9 @@
 #include "op.hpp"
 
 #include "cpu/argmax_cpu.hpp"
+#ifdef ENABLE_NVIDIA_API
+#include "nvidia/argmax_nvidia.cuh"
+#endif
 
 namespace llaisys::ops {
 void argmax(tensor_t max_idx, tensor_t max_val, tensor_t vals) {

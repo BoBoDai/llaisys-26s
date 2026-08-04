@@ -1,8 +1,9 @@
 #include "op.hpp"
 #include "cpu/self_attention.hpp"
-#include <cmath>
+#ifdef ENABLE_NVIDIA_API
+#include "nvidia/self_attention_nvidia.cuh"
+#endif
 #include <cstddef>
-#include <vector>
 
 namespace llaisys::ops {
 void self_attention(tensor_t attn_val, tensor_t q, tensor_t k, tensor_t v, float scale) {

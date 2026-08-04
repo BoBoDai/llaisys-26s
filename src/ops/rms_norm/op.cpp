@@ -1,7 +1,9 @@
 #include "op.hpp"
-#include <cmath>
 
 #include "cpu/rms_norm.hpp"
+#ifdef ENABLE_NVIDIA_API
+#include "nvidia/rms_norm_nvidia.cuh"
+#endif
 
 namespace llaisys::ops {
 void rms_norm(tensor_t out, tensor_t in, tensor_t weight, float eps) {

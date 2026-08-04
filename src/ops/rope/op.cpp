@@ -1,8 +1,10 @@
 #include "op.hpp"
 #include <cstddef>
-#include <cmath>
 
 #include "cpu/rope.hpp"
+#ifdef ENABLE_NVIDIA_API
+#include "nvidia/rope_nvidia.cuh"
+#endif
 
 namespace llaisys::ops {
 void rope(tensor_t out, tensor_t in, tensor_t pos_ids, float theta) {
