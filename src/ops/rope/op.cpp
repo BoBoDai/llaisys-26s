@@ -2,57 +2,32 @@
 #include <cstddef>
 #include <cmath>
 
+#include "cpu/rope.hpp"
+
 namespace llaisys::ops {
-template <typename T>
-void rope_(T* out, const T* in, const int64_t* pos_ids, float theta, size_t seqlen, size_t nhead, size_t d) {
-    size_t half_d = d / 2;
-    size_t seq_stride = nhead * d;
-
-    for (size_t i = 0; i < seqlen; i++) {
-        float pos = static_cast<float>(pos_ids[i]);
-        for (size_t h = 0; h < nhead; h++) {
-            size_t head_off = i * seq_stride + h * d;
-            for (size_t j = 0; j < half_d; j++) {
-                // Compute angle φ = pos / θ^(2j/d)
-                float freq = pos / std::pow(theta,
-                    2.0f * static_cast<float>(j) / static_cast<float>(d));
-                float c = std::cos(freq);
-                float s = std::sin(freq);
-
-                float a = utils::cast<float>(in[head_off + j]);
-                float b = utils::cast<float>(in[head_off + j + half_d]);
-
-                out[head_off + j] = utils::cast<T>(a * c - b * s);
-                out[head_off + j + half_d] = utils::cast<T>(b * c + a * s);
-            }
-        }
-    }
-}
-
 void rope(tensor_t out, tensor_t in, tensor_t pos_ids, float theta) {
-    size_t m = out->shape()[0];
-    size_t n = out->shape()[1];
-    size_t k = out->shape()[2];
-    auto dtype = out->dtype();
+    CHECK_SAME_DEVICE(out, in, pos_ids);
+    CHECK_SAME_SHAPE(out->shape(), in->shape(), pos_ids->shape());
+    CHECK_SAME_DTYPE(out->dtype(), in->dtype(), pos_ids->dtype());
 
-    switch (dtype) {
-        case LLAISYS_DTYPE_BF16:
-            return rope_(
-                reinterpret_cast<bf16_t*>(out->data()),
-                reinterpret_cast<const bf16_t*>(in->data()),
-                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
-        case LLAISYS_DTYPE_F16:
-            return rope_(
-                reinterpret_cast<fp16_t*>(out->data()),
-                reinterpret_cast<const fp16_t*>(in->data()),
-                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
-        case LLAISYS_DTYPE_F32:
-            return rope_(
-                reinterpret_cast<float*>(out->data()),
-                reinterpret_cast<const float*>(in->data()),
-                reinterpret_cast<const int64_t*>(pos_ids->data()), theta, m, n, k);
-        default:
-            EXCEPTION_UNSUPPORTED_DATATYPE(dtype);
-        }
+    ASSERT(out->isContiguous() && in->isContiguous() && pos_ids->isContiguous(),
+           "rope only supports contiguous tensors");
+
+    if (out->deviceType() == LLAISYS_DEVICE_CPU) {
+        return cpu::rope(out, in, pos_ids, theta);
+    }
+
+    llaisys::core::context().setDevice(out->deviceType(), out->deviceId());
+
+    switch (out->deviceType()) {
+    case LLAISYS_DEVICE_CPU:
+        return cpu::rope(out, in, pos_ids, theta);
+#ifdef LLAISYS_NVIDIA_API
+    case LLAISYS_DEVICE_NVIDIA:
+        return nvidia::rope(out, in, pos_ids, theta);
+#endif
+    default:
+        EXCEPTION_UNSUPPORTED_DEVICE;
+    }
 }
 } // namespace llaisys::ops

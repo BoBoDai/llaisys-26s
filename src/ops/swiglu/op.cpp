@@ -1,50 +1,31 @@
 #include "op.hpp"
+#include "cpu/swiglu_cpu.hpp"
 #include <cmath>
 
 namespace llaisys::ops {
+void swiglu(tensor_t out, tensor_t gate, tensor_t up) {
+    CHECK_SAME_DEVICE(out, gate, up);
+    CHECK_SAME_SHAPE(out->shape(), gate->shape(), up->shape());
+    CHECK_SAME_DTYPE(out->dtype(), gate->dtype(), up->dtype());
 
-template<typename T>
-void swiglu_(T* out, const T* gate, const T* up, size_t seqlen, size_t intermediate_size) {
-    for (size_t i = 0; i < seqlen; i++) {
-        for (size_t j = 0; j < intermediate_size; j++) {
-            size_t idx = i * intermediate_size + j;
-            float gate_val = utils::cast<float>(gate[idx]);
-            float up_val = utils::cast<float>(up[idx]);
+    ASSERT(out->isContiguous() && gate->isContiguous() && up->isContiguous(),
+           "swiglu only supports contiguous tensors");
 
-            float silu_val;
-            if (gate_val >= 0) {
-                silu_val = gate_val / (1.0f + std::exp(-gate_val));
-            } else {
-                float exp_gate = std::exp(gate_val);
-                silu_val = gate_val * exp_gate / (1.0f + exp_gate);
-            }
-
-            out[idx] = utils::cast<T>(up_val * silu_val);
-        }
+    if (out->deviceType() == LLAISYS_DEVICE_CPU) {
+        return cpu::swiglu(out, gate, up);
     }
 
-}
+    llaisys::core::context().setDevice(out->deviceType(), out->deviceId());
 
-void swiglu(tensor_t out, tensor_t gate, tensor_t up) {
-    size_t seqlen = gate->shape()[0];
-    size_t intermediate_size = gate->shape()[1];
-    auto dtype = out->dtype();
-
-    switch(dtype) {
-        case LLAISYS_DTYPE_BF16:
-            return swiglu_(reinterpret_cast<bf16_t*>(out->data()), 
-                reinterpret_cast<const bf16_t*>(gate->data()), 
-                reinterpret_cast<const bf16_t*>(up->data()), seqlen, intermediate_size);
-        case LLAISYS_DTYPE_F16:
-            return swiglu_(reinterpret_cast<fp16_t*>(out->data()), 
-                reinterpret_cast<const fp16_t*>(gate->data()), 
-                reinterpret_cast<const fp16_t*>(up->data()), seqlen, intermediate_size);
-        case LLAISYS_DTYPE_F32:
-            return swiglu_(reinterpret_cast<float*>(out->data()), 
-                reinterpret_cast<const float*>(gate->data()), 
-                reinterpret_cast<const float*>(up->data()), seqlen, intermediate_size);
-        default:
-            throw std::runtime_error("Unsupported data type");
+    switch (out->deviceType()) {
+    case LLAISYS_DEVICE_CPU:
+        return cpu::swiglu(out, gate, up);
+#ifdef LLAISYS_NVIDIA_API
+    case LLAISYS_DEVICE_NVIDIA:
+        return nvidia::swiglu(out, gate, up);
+#endif
+    default:
+        EXCEPTION_UNSUPPORTED_DEVICE;
     }
 }
 } // namespace llaisys::ops
