@@ -23,6 +23,9 @@ target("llaisys-ops-nvidia")
         add_cuflags("-Xcompiler=-fPIC", {force = true})
     end
 
+    add_deps("llaisys-tensor")
+    add_deps("llaisys-device-nvidia")
+
     add_files("../src/ops/*/nvidia/*.cu")
 
     on_install(function (target) end)

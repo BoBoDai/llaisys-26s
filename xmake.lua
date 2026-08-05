@@ -127,6 +127,10 @@ target("llaisys")
     add_deps("llaisys-tensor")
     add_deps("llaisys-ops")
     add_deps("llaisys-models")
+    if has_config("nv-gpu") then
+        add_deps("llaisys-device-nvidia")
+        add_deps("llaisys-ops-nvidia")
+    end
 
     set_languages("cxx17")
     set_warnings("all", "error")
