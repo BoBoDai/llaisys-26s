@@ -136,6 +136,10 @@ target("llaisys")
     set_warnings("all", "error")
     add_files("src/llaisys/*.cc")
     set_installdir(".")
+    if has_config("nv-gpu") then
+        add_rules("cuda")
+        add_links("cudart")
+    end
 
     
     after_install(function (target)
