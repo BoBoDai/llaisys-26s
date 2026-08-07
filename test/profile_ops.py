@@ -171,10 +171,10 @@ def profile(device_name):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--device", default="both", choices=["cpu", "nvidia", "both"])
+    parser.add_argument("--device", default="cpu", choices=["cpu", "nvidia", "metax"])
     args = parser.parse_args()
 
-    devices = ["cpu", "nvidia"] if args.device == "both" else [args.device]
+    devices = ["cpu", "nvidia", "metax"] if args.device == "all" else [args.device]
     all_results = {}
 
     for dev in devices:
@@ -183,30 +183,32 @@ def main():
         print(f"{'='*55}")
         all_results[dev] = profile(dev)
 
-    if len(devices) == 2:
+    if len(devices) == 3:
         cpu = all_results["cpu"]
         gpu = all_results["nvidia"]
+        metax = all_results["metax"]
         cpu_total = sum(v for v in cpu.values() if v is not None)
         gpu_total = sum(v for v in gpu.values() if v is not None)
+        metax_total = sum(v for v in metax.values() if v is not None)
 
         print(f"\n{'='*85}")
-        print("CPU vs GPU Comparison  (Qwen2 1.5B decode, f32, time in ms)")
+        print("CPU vs GPU vs Metax Comparison  (Qwen2 1.5B decode, f32, time in ms)")
         print(f"{'='*85}")
-        print(f"{'Operator':<22s} {'CPU (ms)':>10s} {'GPU (ms)':>10s} {'Speedup':>8s} {'CPU %':>8s}")
-        print(f"{'-'*22} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
+        print(f"{'Operator':<22s} {'CPU (ms)':>10s} {'GPU (ms)':>10s} {'Metax (ms)':>10s} {'Speedup':>8s} {'CPU %':>8s}")
+        print(f"{'-'*22} {'-'*10} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
 
         for name, _, _ in OPS:
-            c, g = cpu.get(name), gpu.get(name)
-            if c is None or g is None:
-                print(f"{name:<22s} {'N/A':>10s} {'N/A':>10s} {'N/A':>8s}")
+            c, g, m = cpu.get(name), gpu.get(name), metax.get(name)
+            if c is None or g is None or m is None:
+                print(f"{name:<22s} {'N/A':>10s} {'N/A':>10s} {'N/A':>10s} {'N/A':>8s}")
                 continue
             speedup = c / g if g > 0 else float("inf")
             pct = c / cpu_total * 100 if cpu_total > 0 else 0
-            print(f"{name:<22s} {c:9.4f}  {g:9.4f}  {speedup:7.1f}x  {pct:7.1f}%")
+            print(f"{name:<22s} {c:9.4f}  {g:9.4f}  {m:9.4f}  {speedup:7.1f}x  {pct:7.1f}%")
 
-        print(f"{'-'*22} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
+        print(f"{'-'*22} {'-'*10} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
         ts = cpu_total / gpu_total if gpu_total > 0 else float("inf")
-        print(f"{'Total':<22s} {cpu_total:9.4f}  {gpu_total:9.4f}  {ts:7.1f}x  {100:7.1f}%")
+        print(f"{'Total':<22s} {cpu_total:9.4f}  {gpu_total:9.4f}  {metax_total:9.4f}  {ts:7.1f}x  {100:7.1f}%")
 
         # CPU time breakdown bar chart
         print(f"\nCPU time breakdown:")

@@ -3,6 +3,9 @@
 #ifdef ENABLE_NVIDIA_API
 #include "nvidia/linear_nvidia.cuh"
 #endif
+#ifdef ENABLE_METAX_API
+#include "metax/linear_metax.mch"
+#endif
 
 namespace llaisys::ops {
 
@@ -25,6 +28,10 @@ void linear(tensor_t out, tensor_t in, tensor_t weight, tensor_t bias) {
 #ifdef ENABLE_NVIDIA_API
     case LLAISYS_DEVICE_NVIDIA:
         return nvidia::linear(out, in, weight, bias);
+#endif
+#ifdef ENABLE_METAX_API
+    case LLAISYS_DEVICE_METAX:
+        return metax::linear(out, in, weight, bias);
 #endif
     default:
         EXCEPTION_UNSUPPORTED_DEVICE;

@@ -4,6 +4,9 @@
 #ifdef ENABLE_NVIDIA_API
 #include "nvidia/rms_norm_nvidia.cuh"
 #endif
+#ifdef ENABLE_METAX_API
+#include "metax/rms_norm_metax.mch"
+#endif
 
 namespace llaisys::ops {
 void rms_norm(tensor_t out, tensor_t in, tensor_t weight, float eps) {
@@ -26,6 +29,10 @@ void rms_norm(tensor_t out, tensor_t in, tensor_t weight, float eps) {
 #ifdef ENABLE_NVIDIA_API
     case LLAISYS_DEVICE_NVIDIA:
         return nvidia::rms_norm(out, in, weight, eps);
+#endif
+#ifdef ENABLE_METAX_API
+    case LLAISYS_DEVICE_METAX:
+        return metax::rms_norm(out, in, weight, eps);
 #endif
     default:
         EXCEPTION_UNSUPPORTED_DEVICE;

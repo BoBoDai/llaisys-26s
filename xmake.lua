@@ -18,12 +18,23 @@ if has_config("nv-gpu") then
     includes("xmake/nvidia.lua")
 end
 
+-- MetaX --
+option("metax-gpu")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Whether to compile implementations for MetaX GPU")
+option_end()
+
+if has_config("metax-gpu") then
+    add_defines("ENABLE_METAX_API")
+    includes("xmake/metax.lua")
+end
+
 target("llaisys-utils")
     set_kind("static")
     if has_config("nv-gpu") then
         add_deps("llaisys-device-nvidia")
     end
-
     set_languages("cxx17")
     set_warnings("all", "error")
     if not is_plat("windows") then
@@ -42,6 +53,13 @@ target("llaisys-device")
     add_deps("llaisys-device-cpu")
     if has_config("nv-gpu") then
         add_deps("llaisys-device-nvidia")
+    end
+    if has_config("metax-gpu") then
+        add_rules("metax.macac")
+        add_files("src/device/metax/*.mc")
+        add_linkdirs(path.join(os.getenv("MACA_PATH") or "/opt/maca", "lib"), {public = true})
+        add_rpathdirs(path.join(os.getenv("MACA_PATH") or "/opt/maca", "lib"), {public = true})
+        add_links("mcruntime", {public = true})
     end
 
     set_languages("cxx17")
@@ -92,13 +110,20 @@ target("llaisys-ops")
     if has_config("nv-gpu") then
         add_deps("llaisys-ops-nvidia")
     end
+    if has_config("metax-gpu") then
+        add_rules("metax.macac")
+        add_files("src/ops/*/metax/*.mc")
+        add_linkdirs(path.join(os.getenv("MACA_PATH") or "/opt/maca", "lib"), {public = true})
+        add_rpathdirs(path.join(os.getenv("MACA_PATH") or "/opt/maca", "lib"), {public = true})
+        add_links("mcruntime", "mcblas", {public = true})
+    end
 
     set_languages("cxx17")
     set_warnings("all", "error")
     if not is_plat("windows") then
         add_cxflags("-fPIC", "-Wno-unknown-pragmas")
     end
-    
+
     add_files("src/ops/*/*.cpp")
 
     on_install(function (target) end)
@@ -131,7 +156,6 @@ target("llaisys")
         add_deps("llaisys-device-nvidia")
         add_deps("llaisys-ops-nvidia")
     end
-
     set_languages("cxx17")
     set_warnings("all", "error")
     add_files("src/llaisys/*.cc")
@@ -141,7 +165,12 @@ target("llaisys")
         add_links("cudart")
     end
 
-    
+    on_install(function (target)
+        local bindir = path.join(target:installdir(), is_plat("windows") and "bin" or "lib")
+        os.mkdir(bindir)
+        os.cp(target:targetfile(), bindir)
+    end)
+
     after_install(function (target)
         -- copy shared library to python package
         print("Copying llaisys to python/llaisys/libllaisys/ ..")
